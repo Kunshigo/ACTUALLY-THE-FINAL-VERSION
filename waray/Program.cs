@@ -197,7 +197,7 @@ namespace QuizApp
             Console.Write("Enter password: ");
             string password = Console.ReadLine()?.Trim();
 
-            Console.Write("Enter role (Admin or Student): ");
+            Console.Write("Enter role (Admin (Teacher) or Student): ");
             string role = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(role))
@@ -559,6 +559,7 @@ namespace QuizApp
 
         private void TakeQuiz()
         {
+            SubjectMenu:
             Console.WriteLine("Select a subject for the quiz:");
             Console.WriteLine("1. Science");
             Console.WriteLine("2. Mathematics");
@@ -594,8 +595,9 @@ namespace QuizApp
 
             if (string.IsNullOrEmpty(selectedSubject))
             {
+                Console.Clear();
                 Console.WriteLine("Invalid subject choice. Please choose a valid subject.");
-                return;
+                goto SubjectMenu;
             }
 
             // Use the student's registered grade level
@@ -605,15 +607,17 @@ namespace QuizApp
 
             if (questions.Count == 0)
             {
+                Console.Clear();
                 Console.WriteLine($"No questions found for {selectedSubject} at Grade {gradeLevel}.");
                 return;
             }
-
+            QuestionNo:
             Console.Write("How many questions would you like to answer? ");
             if (!int.TryParse(Console.ReadLine(), out int numberOfQuestions) || numberOfQuestions <= 0)
             {
+                Console.Clear();
                 Console.WriteLine("Invalid number of questions. Please enter a positive number.");
-                return;
+                goto QuestionNo;
             }
 
             // Randomly shuffle and select the desired number of questions
