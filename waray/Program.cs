@@ -14,7 +14,7 @@ namespace QuizApp
             auth.Start();
         }
     }
-
+    
     class Authentication
     {
         private List<User> users = new List<User>();
@@ -197,7 +197,7 @@ namespace QuizApp
             Console.Write("Enter password: ");
             string password = Console.ReadLine()?.Trim();
 
-            Console.Write("Enter role (Admin (Teacher) or Student): ");
+            Console.Write("Enter role [Admin (Teacher) or Student]: ");
             string role = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(role))
@@ -620,11 +620,12 @@ namespace QuizApp
                 goto QuestionNo;
             }
 
-            // Randomly shuffle and select the desired number of questions
+            // randomly shuffle and select the desired number of questions
             var shuffledQuestions = new List<Question>(questions);
             var randomQuestions = new List<Question>();
             Random random = new Random();
-
+            
+            //fisher-yates shuffle
             for (int i = shuffledQuestions.Count - 1; i > 0; i--)
             {
                 int j = random.Next(i + 1);
@@ -808,7 +809,7 @@ namespace QuizApp
             {
                 Console.WriteLine("Welcome!");
                 Console.WriteLine("[1] Add Question\n[2] View Questions\n[3] Delete Questions\n[4] Logout");
-                Console.Write("Input your choice");
+                Console.Write("Input your choice: ");
                 string choice = Console.ReadLine();
 
                 if (choice == "1")
@@ -833,6 +834,7 @@ namespace QuizApp
 
         private void AddQuestion()
         {
+            Console.Clear();
             Console.WriteLine("What type of question would you like to add?");
             Console.WriteLine("1. Multiple Choice");
             Console.WriteLine("2. True or False");
@@ -955,6 +957,7 @@ namespace QuizApp
                 }
 
                 QuestionManager.SaveQuestion(question);
+                Console.Clear();
                 Console.WriteLine("Question added successfully!");
             }
             catch (Exception ex)
@@ -1029,95 +1032,44 @@ namespace QuizApp
             Console.Write("Enter subject to filter: ");
             string subject = Console.ReadLine()?.Trim();
 
-            if (!AvailableSubjects.Contains(subject, StringComparer.OrdinalIgnoreCase))
+            // Validate subject
+            bool subjectExists = false;
+            foreach (string availableSubject in AvailableSubjects)
+            {
+                if (string.Equals(availableSubject, subject, StringComparison.OrdinalIgnoreCase))
+                {
+                    subjectExists = true;
+                    break;
+                }
+            }
+
+            if (!subjectExists)
             {
                 Console.WriteLine($"Invalid subject. Available subjects are: {string.Join(", ", AvailableSubjects)}");
                 return;
             }
 
             Console.Write("Enter grade level to filter (1, 2, 3): ");
-            int gradeLevel;
-            if (!int.TryParse(Console.ReadLine(), out gradeLevel) || gradeLevel < 1 || gradeLevel > 3)
+            if (!int.TryParse(Console.ReadLine(), out int gradeLevel) || gradeLevel < 1 || gradeLevel > 3)
             {
                 Console.WriteLine("Invalid grade level. Please enter a grade level between 1 and 3.");
                 return;
             }
 
-            // Load questions based on subject and grade level
+            // Load questions
             var questions = QuestionManager.LoadQuestions(subject, gradeLevel);
 
-            if (questions.Count == 0)
+            if (questions == null || questions.Count == 0)
             {
-                Console.WriteLine("No questions found for the selected subject and grade level.");
-                return;
-            }
-
-            // Additional filter: Ask for question type or keyword
-            Console.WriteLine("Would you like to apply additional filters?");
-            Console.WriteLine("[1] Filter by question type");
-            Console.WriteLine("[2] Filter by keyword");
-            Console.WriteLine("[3] No additional filter");
-            Console.Write("Select an option: ");
-            string filterChoice = Console.ReadLine()?.Trim();
-
-            List<Question> filteredQuestions = new List<Question>();
-
-            if (filterChoice == "1")
-            {
-                Console.WriteLine("Select question type:");
-                Console.WriteLine("[1] Multiple Choice");
-                Console.WriteLine("[2] True/False");
-                Console.WriteLine("[3] Identification");
-                Console.Write("Enter your choice: ");
-                string typeChoice = Console.ReadLine()?.Trim();
-
-                foreach (var question in questions)
-                {
-                    if (typeChoice == "1" && question is MultipleChoiceQuestion)
-                    {
-                        filteredQuestions.Add(question);
-                    }
-                    else if (typeChoice == "2" && question is TrueFalseQuestion)
-                    {
-                        filteredQuestions.Add(question);
-                    }
-                    else if (typeChoice == "3" && question is IdentificationQuestion)
-                    {
-                        filteredQuestions.Add(question);
-                    }
-                }
-            }
-            else if (filterChoice == "2")
-            {
-                Console.Write("Enter a keyword to filter by (in the question text): ");
-                string keyword = Console.ReadLine()?.Trim();
-
-                if (!string.IsNullOrWhiteSpace(keyword))
-                {
-                    foreach (var question in questions)
-                    {
-                        if (question.QuestionText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            filteredQuestions.Add(question);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // If no additional filters, use all questions
-                filteredQuestions.AddRange(questions);
-            }
-
-            if (filteredQuestions.Count == 0)
-            {
-                Console.WriteLine("No questions match the selected filters.");
+                Console.WriteLine($"No questions found for Subject: '{subject}' and Grade Level: {gradeLevel}.");
                 return;
             }
 
             // Display filtered questions
             Console.Clear();
-            foreach (var question in filteredQuestions)
+            Console.WriteLine($"Questions for Subject: {subject}, Grade Level: {gradeLevel}\n");
+
+            foreach (var question in questions)
             {
                 question.Display(showAnswer: true);
                 Console.WriteLine();
@@ -1127,6 +1079,8 @@ namespace QuizApp
             Console.ReadKey();
             Console.Clear();
         }
+
+
 
 
 
@@ -1247,4 +1201,4 @@ namespace QuizApp
             }
         }
     } //end of the line
-}
+}//hello sir
